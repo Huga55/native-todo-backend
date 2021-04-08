@@ -1,0 +1,65 @@
+const supertest = require("supertest");
+const expect = require("chai").expect;
+const app = require("./index");
+const api = supertest("http://localhost:3000");
+
+const elem = {
+    idForGet: "606e9b4a3d73b637a0f8b4ee",
+    idForDelete: "",
+    type: "movie",
+    data: {
+        name: "Movie 2",
+        description: "Descr 2",
+    }
+}
+
+//POST add new elem
+describe.skip("add new elem POST /section/movie/", function(done) {
+    it("response success", function(done) {
+        api.post(`/section/${elem.type}/`)
+            .set("Content-Type", "application/json")
+            .set("authorization", "asd")
+            .send(elem.data)
+            .end(function(error, response) {
+                console.log("error", error);
+                console.log("response", response.body);
+                expect(response.status).to.equal(200);
+                expect(response.body).deep.equal({success: true});
+                done();
+            })
+    })
+});
+
+
+//GET all elems
+describe("get all elems GET", function(done) {
+    it("response succes and data", function(done) {
+        api.get(`/section/${elem.type}/`)
+            .set("Content-Type", "application/json")
+            .set("authorization", "asd")
+            .end(function(error, response) {
+                console.log("error", error);
+                console.log("response", response.body.data.result);
+                expect(response.status).to.equal(200);
+                expect(response.body.success).to.equal(true);
+                done();
+            });
+    })
+});
+
+//GET one elem
+describe("get one elem by id", function(done) {
+    it("response success and one elem", function(done) {
+        api.get(`/section/${elem.type}/${elem.idForGet}`)
+            .set("Content-Type", "application/json")
+            .set("authorization", "asd")
+            .end(function(error, response) {
+                console.log("error", error);
+                console.log("response", response.body.data.result);
+                expect(response.status).to.equal(200);
+                expect(response.body.success).to.equal(true);
+                done();
+            })
+    })
+})
+
