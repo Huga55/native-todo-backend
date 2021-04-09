@@ -1,6 +1,12 @@
 const path = require("path");
 const Movie = require(path.join(__dirname, "..", "models", "movie"));
 
+const types = {
+    movie: "movie",
+    book: "book",
+    todo: "todo"
+}
+
 exports.getAll = function(request, response) {
     const userId = request.dataUser._id;
     const { type } = request.params;
@@ -12,12 +18,12 @@ exports.getAll = function(request, response) {
     }
 
     switch(type) {
-        case "movie": 
+        case types.movie: 
             Movie.find({userId}, handler);
             break;
-        case "book":
+        case types.book:
             break;
-        case "todo":
+        case types.todo:
             break;
         default:
             return response.status(400).send({success: false, error: "This type was not found."});
@@ -35,12 +41,12 @@ exports.getOne = function(request, response) {
     }
 
     switch(type) {
-        case "movie": 
+        case types.movie: 
             Movie.findOne({userId}, handler);
             break;
-        case "book":
+        case types.book:
             break;
-        case "todo":
+        case types.todo:
             break;
         default:
             return response.status(400).send({success: false, error: "This type was not found."});
@@ -60,13 +66,13 @@ exports.create = function(request, response) {
     }
 
     switch(type) {
-        case "movie":
+        case types.movie:
             const movie = new Movie({...data, userId});
             movie.save(handler);
             break;
-        case "book":
+        case types.book:
             break;
-        case "todo":
+        case types.todo:
             break;
         default:
             return response.status(400).send({success: false, error: "This type was not found."});
@@ -89,12 +95,12 @@ exports.change = function(request, response) {
     }
 
     switch(type) {
-        case "movie":
+        case types.movie:
             Movie.findOneAndUpdate({userId, _id: id}, {...data}, {new: true}, handler);
             break;
-        case "book":
+        case types.book:
             break;
-        case "todo":
+        case types.todo:
             break;
         default:
             return response.status(400).send({success: false, error: "This type was not found."});
@@ -105,19 +111,19 @@ exports.delete = function(request, response) {
     const userId = request.dataUser._id;
     const { type, id } = request.params;
 
-    const handler = (err) => {
+    const handler = (err, result) => {
         if(err) return response.status(400).send({success: false, error});
 
-        return response.send({success: true});
+        return response.send({success: true, data: {id: result._id}});
     }
 
     switch(type) {
-        case "movie":
+        case types.movie:
             Movie.findOneAndDelete({userId, _id: id}, handler);
             break;
-        case "book":
+        case types.book:
             break;
-        case "todo":
+        case types.todo:
             break;
         default:
             return response.status(400).send({success: false, error: "This type was not found."});

@@ -5,10 +5,10 @@ const api = supertest("http://localhost:3000");
 
 const elem = {
     idForGet: "606e9b4a3d73b637a0f8b4ee",
-    idForDelete: "",
+    idForDelete: "606e9e5340e42b1a4c00a588",
     type: "movie",
     data: {
-        name: "Movie 2",
+        name: "Movie 3",
         description: "Descr 2",
     }
 }
@@ -63,3 +63,35 @@ describe("get one elem by id", function(done) {
     })
 })
 
+//PUT change one elem
+describe("change one elem by id", function(done) {
+    it("response success true and get new elem", function(done) {
+        api.put(`/section/${elem.type}`)
+            .set("Content-Type", "application/json")
+            .set("authorization", "asd")
+            .send({...elem.data, id: elem.idForGet})
+            .end(function(error, response) {
+                console.log("error", error);
+                console.log("response", response.body);
+                expect(response.status).to.equal(200);
+                expect(response.body.success).to.equal(true);
+                done();
+            })
+    })
+})
+
+//DELETE one elem
+describe.skip("delete one elem by id", function(done) {
+    it("response success and id", function(done) {
+        api.delete(`/section/${elem.type}/${elem.idForDelete}`)
+            .set("Content-Type", "application/json")
+            .set("authorization", "asd")
+            .end(function(error, response) {
+                console.log("error", error);
+                console.log("response", response.body)
+                expect(response.status).to.equal(200);
+                expect(response.body.success).to.equal(true);
+                done();
+            })
+    })
+})
