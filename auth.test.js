@@ -9,9 +9,9 @@ const registerData = {
 }
 
 //register user
-describe("registration /register", function(done) {
+describe("registration /auth/register", function(done) {
     it("check return false and user alredy exists", function(done) {
-        api.post("/register")
+        api.post("/auth/register")
             .set("Content-Type", "application/json")
             .send(registerData)
             .end(function(error, response) {
@@ -30,9 +30,9 @@ const loginData = {
 }
 
 //login with success
-describe("auth /login", function(done) {
+describe("auth /auth/login", function(done) {
     it("auth user, return success and token", function(done) {
-        api.post("/login")
+        api.post("/auth/login")
             .set("Content-Type", "application/json")
             .send(loginData)
             .end(function(error, response) {
@@ -51,9 +51,9 @@ const loginDataError = {
 }
 
 //login with error
-describe("auth /login", function(done) {
+describe("auth /auth/login", function(done) {
     it("auth user, return error", function(done) {
-        api.post("/login")
+        api.post("/auth/login")
             .set("Content-Type", "application/json")
             .send(loginDataError)
             .end(function(error, response) {
@@ -67,9 +67,9 @@ describe("auth /login", function(done) {
 })
 
 //check user with success
-describe("/check", function(done) {
+describe("/auth/check", function(done) {
     it("check user and response true", function(done) {
-        api.get("/check")
+        api.get("/auth/check")
             .set("Content-Type", "application/json")
             .set("authorization", "asd")
             .end(function(error, response) {
@@ -83,9 +83,9 @@ describe("/check", function(done) {
 })
 
 //check user with false
-describe("/check", function(done) {
+describe("/auth/check", function(done) {
     it("check user and response false", function(done) {
-        api.get("/check")
+        api.get("/auth/check")
             .set("Content-Type", "application/json")
             .set("authorization", "error")
             .end(function(error, response) {

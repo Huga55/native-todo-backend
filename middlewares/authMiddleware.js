@@ -1,22 +1,27 @@
 const path = require("path");
 const User = require(path.join(__dirname, "..", "models", "user"));
-const crypto = require("crypto");
+const bcrypt = require("bcrypt");
+const { generalError } = require(path.join(__dirname, "..", "controllers", "error"));
 
-const authMiddleware = function(request, response, next) {
-    const token = request.headers["authorization"];
-    if(!token) return response.status(403).send({success: false, error: "Token not found"});
+const authMiddleware = async (req, res, next) => {
+    try {
+        const token = req.headers["Authorization"];
+        console.log(req.headers)
+        if(!token) return res.status(400).send({success: false, error: "Токен не найден"});
 
-    const hashToken = crypto.createHash("md5").update(token).digest("hex");
-    User.findOne({token: hashToken}, function(error, result) {
-        if(error) throw error;
+        const hashToken = await bcrypt.hash(token.split(" ")[1], 12);
 
-        if(result) {
-            request.dataUser = result;
-			next();
-        }else {
-            return response.status(403).send({success: false, error: "Token is not correct"});
+        const user = await User.findOne({token: hashToken});
+
+        if(!user) {
+            return res.status(403).send({success: false, error: "Неверный токен"});
         }
-    })
+
+        req.dataUser = user;
+        next();
+    } catch(e) {
+        generalError(e, res);
+    }
 }
 
 module.exports = authMiddleware;

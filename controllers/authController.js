@@ -1,63 +1,89 @@
 const path = require("path");
-const crypto = require("crypto");
+const bcrypt = require("bcrypt");
 const User = require(path.join(__dirname, "..", "models", "user"));
 const randomstring = require("randomstring");
+const { generalError } = require("./error");
+const jwt = require("jsonwebtoken");
+const config  = require("config");
+const { validationResult } = require("express-validator");
 
-exports.check = function(request, response) {
-
-    const { id, email } = request.dataUser;
-
-    return response.send({success: true, data: {id, email}});
+exports.check = async (req, res) => {
+    try {
+        const { email } = req.dataUser;
+        return res.send({success: true, data: {email}});
+    } catch(e) {
+        generalError(e, res);
+    }
 }
 
-exports.login = function(request, response) {
-    if(!request.body || Object.keys(request.body).length === 0) return response.status(400).send({success: false, error: "Data not found"});
-
-    const { email, password } = request.body;
-    const hashPassword = crypto.createHash("md5").update(password).digest("hex");
-    
-    User.exists({email, password: hashPassword}, function(err, result) {
-        if(err) throw err;
-        console.log("result", result);
-        if(result) {
-            const { token, hashToken } = createToken();
-
-            User.findOneAndUpdate({email, password: hashPassword}, {token: hashToken}, function(err) {
-                if(err) throw err;
-
-                return response.send({success: true, data: {token}});
-            });
-        }else {
-            return response.status(400).send({success: false, error: "Login or password are incorrect"});
-        }
-    })
-}
-
-exports.register = function(request, response) {
-    if(!request.body || Object.keys(request.body).length === 0) return response.status(400).send({success: false, error: "Data not found"});
-
-    const { email, password } = request.body;
-    const hashPassword = crypto.createHash("md5").update(password).digest("hex");
-
-    User.findOne({email}, function(err, result) {
-        if(err) throw err;
-
-        if(result) {
-            return response.status(400).send({success: false, error: "User with this email already exists"});
+exports.login = async (req, res) => {
+    try {
+        const errors = validationResult(req);
+        if(!errors.isEmpty()) {
+            return res.status(400).send({success: true, error: "Неверные данные", detail: errors.array()});
         }
 
-        const { token, hashToken } = createToken();
+        const { email, password } = req.body;
 
-        const user = new User({email, password: hashPassword, token: hashToken});
-        user.save();
+        const isUserExist = await User.findOne({email});
 
-        return response.send({success: true, data: {email, token}});
-    });
+        const userError = () => {
+            return res.status(404).send({success: false, error: "Пользователь с данным логином и/или паролем не найден"});
+        }
+
+        if(!isUserExist) {
+            return userError();
+        }
+
+        const isPasswordTrue = await bcrypt.compare(password, isUserExist.password);
+
+        if(!isPasswordTrue) {
+            return userError();
+        }
+
+        const token = await jwt.sign(
+            {email: isUserExist.email},
+            config.get("secret-string"),
+            {expiresIn: "30 days"},
+        );
+
+        await User.findOneAndUpdate({_id: isUserExist._id}, {token});
+
+        return res.status(201).send({success: true, data: {token, email}});
+    } catch(e) {
+        generalError(e, res);
+    }
 }
 
-const createToken = () => {
-    const token = randomstring.generate(25);
-    const hashToken = crypto.createHash("md5").update(token).digest("hex");
+exports.register = async (req, res) => {
+    try {
+        const errors = validationResult(req);
+        if(!errors.isEmpty()) {
+            return res.status(400).send({success: true, error: "Неверные данные", detail: errors.array()});
+        }
 
-    return {token, hashToken};
+        const { email, password } = req.body;
+
+        const isUserExist = await User.findOne({email});
+
+        if(isUserExist) {
+            return res.status(409).send({success: false, error: "Пользователь с данным email уже существует"});
+        }
+
+        const hashPassword = await bcrypt.hash(password, 12);
+
+        const token = await jwt.sign(
+            {email},
+            config.get("secret-string"),
+            {expiresIn: "30 days"},
+        );
+
+        const user = new User({email, password: hashPassword, token, limit: config.get("limit")});
+
+        await user.save();
+
+        return res.status(201).send({success: true, data:{email, token}});
+    } catch(e) {
+        generalError(e, res);
+    }
 }
