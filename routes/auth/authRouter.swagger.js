@@ -58,7 +58,7 @@
  * /auth/login:
  *  post:
  *      description: Login user
- *      tags: [User]
+ *      tags: [Authentication]
  *      requestBody:
  *          required: true
  *          content:
@@ -127,7 +127,7 @@
  * /auth/register:
  *  post:
  *      description: Registration user
- *      tags: [User]
+ *      tags: [Authentication]
  *      requestBody:
  *          required: true
  *          content:
@@ -196,6 +196,7 @@
  * /auth/check:
  *  get:
  *      description: Check is auth this user
+ *      tags: [Authentication]
  *      security:
  *          - BearerAuth: [read]
  *      responses:
@@ -240,4 +241,52 @@
  *                                  properties:
  *                                      email:
  *                                          type: string
+ */
+
+
+/**
+ * @swagger
+ * /auth/logout:
+ *  put:
+ *      description: Logout user
+ *      tags: [Authentication]
+ *      security:
+ *          - BearerAuth: [read]
+ *      responses:
+ *          200:
+ *              description: Logout success
+ *              content:
+ *                  application/json:
+ *                      schema:
+ *                          type: object
+ *                          properties:
+ *                              success:
+ *                                  type: boolean     
+ *                                  default: true
+ *          400:
+ *              description: Token not found
+ *              content: 
+ *                  application/json:
+ *                      schema:
+ *                          type: object
+ *                          properties:
+ *                              success:
+ *                                  type: boolean
+ *                                  default: false
+ *                              error:
+ *                                  type: string
+ *                                  default: Токен не найден
+ *          403:
+ *              description: Token is incorrect
+ *              content:
+ *                  application/json:
+ *                      schema:
+ *                          type: object
+ *                          properties:
+ *                              success: 
+ *                                  type: boolean
+ *                                  default: false
+ *                              error:
+ *                                  type: string
+ *                                  default: Неверный токен
  */

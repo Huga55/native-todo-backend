@@ -87,3 +87,15 @@ exports.register = async (req, res) => {
         generalError(e, res);
     }
 }
+
+exports.logout = async (req, res) => {
+    try {
+        const { _id } = req.dataUser;
+
+        await User.updateOne({_id}, {token: null});
+        
+        res.status(200).send({success: true});
+    } catch(e) {
+        generalError(e, res);
+    }
+}

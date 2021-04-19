@@ -1,5 +1,8 @@
 const path = require("path");
 const Movie = require(path.join(__dirname, "..", "models", "movie"));
+const Todo = require(path.join(__dirname, "..", "models", "todo"));
+const Book = require(path.join(__dirname, "..", "models", "book"));
+const { generalError } = require("./error");
 
 const types = {
     movie: "movie",
@@ -7,26 +10,17 @@ const types = {
     todo: "todo"
 }
 
-exports.getAll = function(request, response) {
-    const userId = request.dataUser._id;
-    const { type } = request.params;
+exports.getAll = async function(req, res) {
+    try {
+        const userId = req.dataUser._id;
 
-    const handler = (err, result) => {
-        if(err) return response.status(400).send({success: false, error});
+        const movies = await Movie.find({userId});
+        const books = await Book.find({userId});
+        const todos = await Todo.find({userId});
 
-        return response.send({success: true, data: {result}});
-    }
-
-    switch(type) {
-        case types.movie: 
-            Movie.find({userId}, handler);
-            break;
-        case types.book:
-            break;
-        case types.todo:
-            break;
-        default:
-            return response.status(400).send({success: false, error: "This type was not found."});
+        return res.send({success: true, data: {movies, books, todos}});
+    } catch(e) {
+        generalError(e);
     }
 }
 

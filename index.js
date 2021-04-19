@@ -18,7 +18,7 @@ const swaggerOptions = {
             version: '1.0.0',
         },
     },
-    apis: ['./routes/*.swagger.js'],
+    apis: ['./routes/*/*.swagger.js'],
 }
 const swaggerDocs = swaggerJsdoc(swaggerOptions);
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs))
@@ -32,8 +32,8 @@ app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
 
 //routes
-const authRouter = require(path.join(__dirname, "routes", "authRouter"));
-const sectionRouter = require(path.join(__dirname, "routes", "sectionRouter"));
+const authRouter = require(path.join(__dirname, "routes", "auth", "authRouter"));
+const sectionRouter = require(path.join(__dirname, "routes", "section", "sectionRouter"));
 
 app.use("/auth", authRouter);
 app.use(authMiddleware);
