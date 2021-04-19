@@ -2,6 +2,7 @@ const path = require("path");
 const Movie = require(path.join(__dirname, "..", "models", "movie"));
 const Todo = require(path.join(__dirname, "..", "models", "todo"));
 const Book = require(path.join(__dirname, "..", "models", "book"));
+const { createValidation, changeValidation } = require(path.join(__dirname, "..", "routes", "section", "sectionRouter.validate"));
 const { generalError } = require("./error");
 
 const types = {
@@ -10,7 +11,7 @@ const types = {
     todo: "todo"
 }
 
-exports.getAll = async function(req, res) {
+exports.getAll = async (req, res) => {
     try {
         const userId = req.dataUser._id;
 
@@ -20,106 +21,135 @@ exports.getAll = async function(req, res) {
 
         return res.send({success: true, data: {movies, books, todos}});
     } catch(e) {
-        generalError(e);
+        generalError(e, res);
     }
 }
 
-exports.getOne = function(request, response) {
-    const userId = request.dataUser._id;
-    const { type, id } = request.params;
+exports.getOne = async (req, res) => {
+    try {
+        const userId = req.dataUser._id;
+        const { type, id } = req.params;
 
-    const handler = (err, result) => {
-        if(err) return response.status(400).send({success: false, error});
-
-        return response.send({success: true, data: {result}});
-    }
-
-    switch(type) {
-        case types.movie: 
-            Movie.findOne({userId}, handler);
-            break;
-        case types.book:
-            break;
-        case types.todo:
-            break;
-        default:
-            return response.status(400).send({success: false, error: "This type was not found."});
-    }
-}
-
-exports.create = function(request, response) {
-    if(!request.body || Object.keys(request.params).length == 0) response.status(400).send({success: false, error: "Data not found"});
-    const userId = request.dataUser._id;
-    const { type } = request.params;
-    const data = request.body;
-
-    const handler = (err) => {
-        if(err) return response.status(400).send({success: false, error});
-
-        return response.send({success: true});
-    }
-
-    switch(type) {
-        case types.movie:
-            const movie = new Movie({...data, userId});
-            movie.save(handler);
-            break;
-        case types.book:
-            break;
-        case types.todo:
-            break;
-        default:
-            return response.status(400).send({success: false, error: "This type was not found."});
-    }
-}
-
-exports.change = function(request, response) {
-    if(!request.body || Object.keys(request.params).length == 0) response.status(400).send({success: false, error: "Data not found"});
-    const userId = request.dataUser._id;
-    const { type } = request.params;
-    const { id, ...data } = request.body;
-
-    const handler = (err, result) => {
-        if(err) return response.status(400).send({success: false, error});
-
-        if(result) {
-            return response.send({success: true, data:{result}});
+        const handler = (result) => {
+            return res.send({success: true, data: {...result}});
         }
-        return response.status(400).send({success: false});
-    }
 
-    switch(type) {
-        case types.movie:
-            Movie.findOneAndUpdate({userId, _id: id}, {...data}, {new: true}, handler);
-            break;
-        case types.book:
-            break;
-        case types.todo:
-            break;
-        default:
-            return response.status(400).send({success: false, error: "This type was not found."});
+        switch(type) {
+            case types.movie:
+                const movie = await Movie.findOne({userId, _id: id});
+                return handler({movie});
+            case types.book:
+                const book = await Book.findOne({userId, _id: id});
+                return handler({book});
+            case types.todo:
+                const todo = await Todo.findOne({userId, _id: id});
+                return handler({todo})
+            default:
+                return res.status(404).send({success: false, error: "Данный раздел не найден"});
+        }
+    } catch(e) {
+        generalError(e, res);
     }
 }
 
-exports.delete = function(request, response) {
-    const userId = request.dataUser._id;
-    const { type, id } = request.params;
+exports.create = async (req, res) => {
+    try {
+        const errors = createValidation(req);
+        if(!errors.isEmpty()) {
+            return res.status(400).send({success: true, error: "Неверные данные", detail: errors.array()});
+        }
 
-    const handler = (err, result) => {
-        if(err) return response.status(400).send({success: false, error});
+        const userId = req.dataUser._id;
+        const { type } = req.params;
+        const data = req.body;
 
-        return response.send({success: true, data: {id: result._id}});
+        const handler = (result) => {
+            return res.send({success: true, data: {...result}});
+        }
+
+        switch(type) {
+            case types.movie:
+                const movie = new Movie({...data, userId});
+                const newMovie = await movie.save();
+                return handler({movie: newMovie});
+            case types.book:
+                const book = new Book({...data, userId});
+                const newBook = await book.save();
+                return handler({book: newBook});
+            case types.todo:
+                const todo = new Todo({...data, userId});
+                const newTodo = await todo.save();
+                return handler({todo: newTodo});
+            default:
+                return res.status(400).send({success: false, error: "Данный раздел не найден"});
+        }
+    } catch(e) {
+        generalError(e, res);
     }
+}
 
-    switch(type) {
-        case types.movie:
-            Movie.findOneAndDelete({userId, _id: id}, handler);
-            break;
-        case types.book:
-            break;
-        case types.todo:
-            break;
-        default:
-            return response.status(400).send({success: false, error: "This type was not found."});
+exports.change = async (req, res) => {
+    try {
+        const errors = changeValidation(req);
+        if(!errors.isEmpty()) {
+            return res.status(400).send({success: true, error: "Неверные данные", detail: errors.array()});
+        }
+
+        const userId = req.dataUser._id;
+        const { type } = req.params;
+        const { id, ...data } = req.body;
+
+        const handler = (result) => {
+            if(result) {
+                return res.send({success: true, data:{result}});
+            }
+            return res.status(404).send({success: false, error: "Объект не найден"});
+        }
+
+        switch(type) {
+            case types.movie:
+                const movie = await Movie.findOneAndUpdate({userId, _id: id}, {...data}, {new: true});
+                return handler(movie);
+            case types.book:
+                const book = await Book.findOneAndUpdate({userId, _id: id}, {...data}, {new: true});
+                return handler(book);
+            case types.todo:
+                const todo = await Todo.findOneAndUpdate({userId, _id: id}, {...data}, {new: true});
+                return handler(todo);
+            default:
+                return res.status(400).send({success: false, error: "Данный раздел не найден"});
+        }
+    } catch(e) {
+        generalError(e, res);
+    }
+}
+
+exports.delete = async (req, res) => {
+    try {
+        const userId = req.dataUser._id;
+        const { type, id } = req.params;
+
+        const handler = (id) => {
+            if(!id) {
+                return res.status(404).send({success: false, error: "Объект не найден"});
+            }
+            return res.send({success: true, data: {id}});
+        }
+
+        switch(type) {
+            case types.movie:
+                const movie = await Movie.findOneAndDelete({userId, _id: id});
+                return handler(movie._id);
+            case types.book:
+                const book = await Book.findOneAndDelete({userId, _id: id});
+                return handler(book._id);
+            case types.todo:
+                const todo = await Todo.findOneAndDelete({userId, _id: id});
+                return handler(todo._id);
+            default:
+                return res.status(400).send({success: false, error: "Данный раздел не найден"});
+        }
+    } catch(e) {
+        generalError(e, res);
     }
 }

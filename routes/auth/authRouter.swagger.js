@@ -45,6 +45,31 @@
  *                  msg: Неверный формат email
  *                  param: email
  *                  location: body
+ *      responses:
+ *          500:
+ *              description: Server's error
+ *              content:
+ *                  application/json:
+ *                      schema:
+ *                          type: object
+ *                          properties:
+ *                              success:
+ *                                  type: boolean
+ *                                  default: false
+ *                              error:
+ *                                  type: string
+ *                                  default: Что-то пошло не так...
+ *          401:
+ *              type: object
+ *              properties:
+ *                  success:
+ *                      type: boolean
+ *                      default: false
+ *                  error:
+ *                      type: string
+ *                      default: Неверный токен
+ *
+ *
  *      securitySchemes:
  *          BearerAuth:
  *              type: http
@@ -90,19 +115,6 @@
  *                                          type: string
  *                                      email:
  *                                          type: string
- *          404:
- *              description: Fail and Error message
- *              content:
- *                  application/json:
- *                      schema:
- *                          type: object
- *                          properties:
- *                              success:
- *                                  type: boolean
- *                                  default: false
- *                              error:
- *                                  type: string
- *                                  default: Пользователь с данным логином и/или паролем не найден
  *          400:
  *              description: Data is incorrect
  *              content:
@@ -120,6 +132,21 @@
  *                                      type: array
  *                                      items:
  *                                          $ref: '#/components/schemas/ErrorDetails'
+ *          404:
+ *              description: Fail and Error message
+ *              content:
+ *                  application/json:
+ *                      schema:
+ *                          type: object
+ *                          properties:
+ *                              success:
+ *                                  type: boolean
+ *                                  default: false
+ *                              error:
+ *                                  type: string
+ *                                  default: Пользователь с данным логином и/или паролем не найден
+ *          500:
+ *              $ref: '#/components/responses/500'
  */
 
 /**
@@ -189,6 +216,12 @@
  *                              error:
  *                                  type: string
  *                                  default: Пользователь с данным email уже существует
+ *          500:
+ *              description: Servers's error
+ *              content:
+ *                  application/json:
+ *                      schema:
+ *                          $ref: '#/components/schemas/500'
  */
 
 /**
@@ -200,32 +233,6 @@
  *      security:
  *          - BearerAuth: [read]
  *      responses:
- *          400:
- *              description: Token not found
- *              content:
- *                  application/json:
- *                      schema:
- *                          type: object
- *                          properties:
- *                              success:
- *                                  type: boolean
- *                                  default: false
- *                              error:
- *                                  type: string
- *                                  default: Токен не найден
- *          403:
- *              description: Token is incorrect
- *              content:
- *                  application/json:
- *                      schema:
- *                          type: object
- *                          properties:
- *                              success:
- *                                  type: boolean
- *                                  default: false
- *                              error:
- *                                  type: string
- *                                  default: Неверный токен
  *          200:
  *              description: Token is correct
  *              content:
@@ -241,6 +248,18 @@
  *                                  properties:
  *                                      email:
  *                                          type: string
+ *          401:
+ *              description: Token is incorrect
+ *              content:
+ *                  application/json:
+ *                      schema:
+ *                          $ref: '#/components/schemas/401'
+ *          500:
+ *              description: Server's error
+ *              content:
+ *                  application/json:
+ *                      schema:
+ *                          $ref: '#/components/schemas/500'
  */
 
 
@@ -263,19 +282,6 @@
  *                              success:
  *                                  type: boolean     
  *                                  default: true
- *          400:
- *              description: Token not found
- *              content: 
- *                  application/json:
- *                      schema:
- *                          type: object
- *                          properties:
- *                              success:
- *                                  type: boolean
- *                                  default: false
- *                              error:
- *                                  type: string
- *                                  default: Токен не найден
  *          403:
  *              description: Token is incorrect
  *              content:
@@ -289,4 +295,10 @@
  *                              error:
  *                                  type: string
  *                                  default: Неверный токен
+ *          500:
+ *              description: Server's error
+ *              content:
+ *                  application/json:
+ *                      schema:
+ *                          $ref: '#/components/schemas/500'
  */
