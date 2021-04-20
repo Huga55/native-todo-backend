@@ -31,7 +31,10 @@ exports.getOne = async (req, res) => {
         const { type, id } = req.params;
 
         const handler = (result) => {
-            return res.send({success: true, data: {...result}});
+            if(result) {
+                return res.send({success: true, data: {...result}});
+            }
+            return res.status(404).send({success: false, error: "Данный элемент не найден"});
         }
 
         switch(type) {

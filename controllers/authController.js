@@ -9,8 +9,8 @@ const { validationResult } = require("express-validator");
 
 exports.check = async (req, res) => {
     try {
-        const { email } = req.dataUser;
-        return res.send({success: true, data: {email}});
+        const { email, limit } = req.dataUser;
+        return res.send({success: true, data: {email, limit}});
     } catch(e) {
         generalError(e, res);
     }
@@ -49,7 +49,7 @@ exports.login = async (req, res) => {
 
         await User.findOneAndUpdate({_id: isUserExist._id}, {token});
 
-        return res.status(201).send({success: true, data: {token, email}});
+        return res.status(201).send({success: true, data: {token, email, limit: isUserExist.limit}});
     } catch(e) {
         generalError(e, res);
     }
@@ -82,7 +82,7 @@ exports.register = async (req, res) => {
 
         await user.save();
 
-        return res.status(201).send({success: true, data:{email, token}});
+        return res.status(201).send({success: true, data:{email, token, limit: config.get("limit")}});
     } catch(e) {
         generalError(e, res);
     }

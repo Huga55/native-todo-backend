@@ -60,20 +60,23 @@
  *                                  type: string
  *                                  default: Что-то пошло не так...
  *          401:
- *              type: object
- *              properties:
- *                  success:
- *                      type: boolean
- *                      default: false
- *                  error:
- *                      type: string
- *                      default: Неверный токен
- *
- *
+ *              description: Token is incorrect
+ *              content:
+ *                  application/json:
+ *                      schema:
+ *                          type: object
+ *                          properties:
+ *                              success:
+ *                                  type: boolean
+ *                                  default: false
+ *                              error:
+ *                                  type: string
+ *                                  default: Неверный токен
  *      securitySchemes:
  *          BearerAuth:
  *              type: http
  *              scheme: bearer
+ *              bearerFormat: JWT
  */
 
 
@@ -115,6 +118,9 @@
  *                                          type: string
  *                                      email:
  *                                          type: string
+ *                                      limit:
+ *                                          type: number
+ *                                          description: user's limit of sections
  *          400:
  *              description: Data is incorrect
  *              content:
@@ -133,7 +139,7 @@
  *                                      items:
  *                                          $ref: '#/components/schemas/ErrorDetails'
  *          404:
- *              description: Fail and Error message
+ *              description: User not found
  *              content:
  *                  application/json:
  *                      schema:
@@ -186,6 +192,9 @@
  *                                          type: string
  *                                      email:
  *                                          type: string
+ *                                      limit:
+ *                                          type: number
+ *                                          description: user's limit of sections
  *          400:
  *              description: Data is incorrect
  *              content:
@@ -217,11 +226,7 @@
  *                                  type: string
  *                                  default: Пользователь с данным email уже существует
  *          500:
- *              description: Servers's error
- *              content:
- *                  application/json:
- *                      schema:
- *                          $ref: '#/components/schemas/500'
+ *              $ref: '#/components/responses/500'
  */
 
 /**
@@ -248,18 +253,13 @@
  *                                  properties:
  *                                      email:
  *                                          type: string
+ *                                      limit:
+ *                                          type: number
+ *                                          description: user's limit of sections
  *          401:
- *              description: Token is incorrect
- *              content:
- *                  application/json:
- *                      schema:
- *                          $ref: '#/components/schemas/401'
+ *              $ref: '#/components/responses/401'
  *          500:
- *              description: Server's error
- *              content:
- *                  application/json:
- *                      schema:
- *                          $ref: '#/components/schemas/500'
+ *              $ref: '#/components/responses/500'
  */
 
 
@@ -282,23 +282,8 @@
  *                              success:
  *                                  type: boolean     
  *                                  default: true
- *          403:
- *              description: Token is incorrect
- *              content:
- *                  application/json:
- *                      schema:
- *                          type: object
- *                          properties:
- *                              success: 
- *                                  type: boolean
- *                                  default: false
- *                              error:
- *                                  type: string
- *                                  default: Неверный токен
+ *          401:
+ *              $ref: '#/components/responses/401'
  *          500:
- *              description: Server's error
- *              content:
- *                  application/json:
- *                      schema:
- *                          $ref: '#/components/schemas/500'
+ *              $ref: '#/components/responses/500'
  */
