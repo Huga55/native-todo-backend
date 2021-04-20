@@ -32,7 +32,7 @@ describe.skip("add new elem POST /section/movie/", function(done) {
 
 
 //GET all elems
-describe("get all elems GET", function(done) {
+describe.skip("get all elems GET", function(done) {
     it("response succes and data", function(done) {
         api.get(`/section/${elem.type}/`)
             .set("Content-Type", "application/json")
@@ -48,7 +48,7 @@ describe("get all elems GET", function(done) {
 });
 
 //GET one elem
-describe("get one elem by id", function(done) {
+describe.skip("get one elem by id", function(done) {
     it("response success and one elem", function(done) {
         api.get(`/section/${elem.type}/${elem.idForGet}`)
             .set("Content-Type", "application/json")
@@ -64,7 +64,7 @@ describe("get one elem by id", function(done) {
 })
 
 //PUT change one elem
-describe("change one elem by id", function(done) {
+describe.skip("change one elem by id", function(done) {
     it("response success true and get new elem", function(done) {
         api.put(`/section/${elem.type}`)
             .set("Content-Type", "application/json")

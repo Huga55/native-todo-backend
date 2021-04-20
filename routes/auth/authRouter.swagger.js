@@ -46,8 +46,8 @@
  *                  param: email
  *                  location: body
  *      responses:
- *          500:
- *              description: Server's error
+ *          IncorrectData400:
+ *              description: Data is incorrect
  *              content:
  *                  application/json:
  *                      schema:
@@ -58,7 +58,11 @@
  *                                  default: false
  *                              error:
  *                                  type: string
- *                                  default: Что-то пошло не так...
+ *                                  default: Неверные данные
+ *                              details:
+ *                                  type: array
+ *                                  items:
+ *                                      $ref: '#/components/schemas/ErrorDetails'
  *          401:
  *              description: Token is incorrect
  *              content:
@@ -72,6 +76,19 @@
  *                              error:
  *                                  type: string
  *                                  default: Неверный токен
+ *          500:
+ *              description: Server's error
+ *              content:
+ *                  application/json:
+ *                      schema:
+ *                          type: object
+ *                          properties:
+ *                              success:
+ *                                  type: boolean
+ *                                  default: false
+ *                              error:
+ *                                  type: string
+ *                                  default: Что-то пошло не так...
  *      securitySchemes:
  *          BearerAuth:
  *              type: http
@@ -122,22 +139,7 @@
  *                                          type: number
  *                                          description: user's limit of sections
  *          400:
- *              description: Data is incorrect
- *              content:
- *                  application/json:
- *                      schema:
- *                          type: object
- *                          properties:
- *                              success:
- *                                  type: boolean
- *                                  default: false
- *                              error:
- *                                  type: string
- *                                  default: Неверные данные
- *                              details:
- *                                      type: array
- *                                      items:
- *                                          $ref: '#/components/schemas/ErrorDetails'
+ *              $ref: '#/components/responses/IncorrectData400'
  *          404:
  *              description: User not found
  *              content:

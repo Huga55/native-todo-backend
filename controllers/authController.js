@@ -20,7 +20,7 @@ exports.login = async (req, res) => {
     try {
         const errors = validationResult(req);
         if(!errors.isEmpty()) {
-            return res.status(400).send({success: true, error: "Неверные данные", detail: errors.array()});
+            return res.status(400).send({success: false, error: "Неверные данные", detail: errors.array()});
         }
 
         const { email, password } = req.body;
@@ -59,7 +59,7 @@ exports.register = async (req, res) => {
     try {
         const errors = validationResult(req);
         if(!errors.isEmpty()) {
-            return res.status(400).send({success: true, error: "Неверные данные", detail: errors.array()});
+            return res.status(400).send({success: false, error: "Неверные данные", detail: errors.array()});
         }
 
         const { email, password } = req.body;

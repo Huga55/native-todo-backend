@@ -11,6 +11,13 @@ const types = {
     todo: "todo"
 }
 
+const changeKeyId = (arr) => {
+    return arr.map(e => {
+        const { _id, ...other } = e;
+        return {id: _id, ...other};
+    });
+}
+
 exports.getAll = async (req, res) => {
     try {
         const userId = req.dataUser._id;
@@ -19,7 +26,7 @@ exports.getAll = async (req, res) => {
         const books = await Book.find({userId});
         const todos = await Todo.find({userId});
 
-        return res.send({success: true, data: {movies, books, todos}});
+        return res.send({success: true, data: {movies: changeKeyId(movies), books: changeKeyId(books), todos: changeKeyId(todos)}});
     } catch(e) {
         generalError(e, res);
     }
@@ -32,7 +39,8 @@ exports.getOne = async (req, res) => {
 
         const handler = (result) => {
             if(result) {
-                return res.send({success: true, data: {...result}});
+                const { _id, ...other } = result;
+                return res.send({success: true, data: {...other, id: _id}});
             }
             return res.status(404).send({success: false, error: "Данный элемент не найден"});
         }
@@ -59,7 +67,7 @@ exports.create = async (req, res) => {
     try {
         const errors = createValidation(req);
         if(!errors.isEmpty()) {
-            return res.status(400).send({success: true, error: "Неверные данные", detail: errors.array()});
+            return res.status(400).send({success: false, error: "Неверные данные", detail: errors.array()});
         }
 
         const userId = req.dataUser._id;
@@ -67,7 +75,11 @@ exports.create = async (req, res) => {
         const data = req.body;
 
         const handler = (result) => {
-            return res.send({success: true, data: {...result}});
+            if(!result) {
+                const {_id, ...other} = result;
+                return res.send({success: true, data: {...other, id: _id}});
+            }
+            return res.status(404).send({success: false, error: "Данный элемент не найден"});
         }
 
         switch(type) {
@@ -84,7 +96,7 @@ exports.create = async (req, res) => {
                 const newTodo = await todo.save();
                 return handler({todo: newTodo});
             default:
-                return res.status(400).send({success: false, error: "Данный раздел не найден"});
+                return res.status(404).send({success: false, error: "Данный раздел не найден"});
         }
     } catch(e) {
         generalError(e, res);
@@ -95,7 +107,7 @@ exports.change = async (req, res) => {
     try {
         const errors = changeValidation(req);
         if(!errors.isEmpty()) {
-            return res.status(400).send({success: true, error: "Неверные данные", detail: errors.array()});
+            return res.status(400).send({success: false, error: "Неверные данные", detail: errors.array()});
         }
 
         const userId = req.dataUser._id;
@@ -104,9 +116,10 @@ exports.change = async (req, res) => {
 
         const handler = (result) => {
             if(result) {
-                return res.send({success: true, data:{result}});
+                const {_id, ...other} = result;
+                return res.send({success: true, data:{...other, id: _id}});
             }
-            return res.status(404).send({success: false, error: "Объект не найден"});
+            return res.status(404).send({success: false, error: "Данный элемент не найден"});
         }
 
         switch(type) {
@@ -120,7 +133,7 @@ exports.change = async (req, res) => {
                 const todo = await Todo.findOneAndUpdate({userId, _id: id}, {...data}, {new: true});
                 return handler(todo);
             default:
-                return res.status(400).send({success: false, error: "Данный раздел не найден"});
+                return res.status(404).send({success: false, error: "Данный раздел не найден"});
         }
     } catch(e) {
         generalError(e, res);
@@ -134,7 +147,7 @@ exports.delete = async (req, res) => {
 
         const handler = (id) => {
             if(!id) {
-                return res.status(404).send({success: false, error: "Объект не найден"});
+                return res.status(404).send({success: false, error: "Данный элемент не найден"});
             }
             return res.send({success: true, data: {id}});
         }
@@ -150,7 +163,7 @@ exports.delete = async (req, res) => {
                 const todo = await Todo.findOneAndDelete({userId, _id: id});
                 return handler(todo._id);
             default:
-                return res.status(400).send({success: false, error: "Данный раздел не найден"});
+                return res.status(404).send({success: false, error: "Данный раздел не найден"});
         }
     } catch(e) {
         generalError(e, res);
