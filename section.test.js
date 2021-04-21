@@ -14,17 +14,17 @@ const elem = {
 }
 
 //POST add new elem
-describe.skip("add new elem POST /section/movie/", function(done) {
+describe("add new elem POST /section/movie/", function(done) {
     it("response success", function(done) {
         api.post(`/section/${elem.type}/`)
             .set("Content-Type", "application/json")
-            .set("authorization", "asd")
+            .set("authorization", "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InRlc3RAbWFpbC5ydSIsImlhdCI6MTYxODk4MjAyMiwiZXhwIjoxNjIxNTc0MDIyfQ.qRsslDJ3YwjvU9n8EspvqyTXZSnl2Sp6lYFOBfLpITY")
             .send(elem.data)
             .end(function(error, response) {
                 console.log("error", error);
                 console.log("response", response.body);
                 expect(response.status).to.equal(200);
-                expect(response.body).deep.equal({success: true});
+                expect(response.body).deep.equal({success: true, data: {id: String(), name: String(), description: String()}});
                 done();
             })
     })

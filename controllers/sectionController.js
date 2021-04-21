@@ -2,8 +2,8 @@ const path = require("path");
 const Movie = require(path.join(__dirname, "..", "models", "movie"));
 const Todo = require(path.join(__dirname, "..", "models", "todo"));
 const Book = require(path.join(__dirname, "..", "models", "book"));
-const { createValidation, changeValidation } = require(path.join(__dirname, "..", "routes", "section", "sectionRouter.validate"));
 const { generalError } = require("./error");
+const { validationResult } = require('express-validator');
 
 const types = {
     movie: "movie",
@@ -65,7 +65,7 @@ exports.getOne = async (req, res) => {
 
 exports.create = async (req, res) => {
     try {
-        const errors = createValidation(req);
+        const errors = validationResult(req);
         if(!errors.isEmpty()) {
             return res.status(400).send({success: false, error: "Неверные данные", detail: errors.array()});
         }
@@ -75,9 +75,10 @@ exports.create = async (req, res) => {
         const data = req.body;
 
         const handler = (result) => {
-            if(!result) {
-                const {_id, ...other} = result;
-                return res.send({success: true, data: {...other, id: _id}});
+            console.log("result", result);
+            if(result) {
+                const {_id, name, description} = result;
+                return res.send({success: true, data: {name, description, id: _id}});
             }
             return res.status(404).send({success: false, error: "Данный элемент не найден"});
         }
@@ -86,15 +87,15 @@ exports.create = async (req, res) => {
             case types.movie:
                 const movie = new Movie({...data, userId});
                 const newMovie = await movie.save();
-                return handler({movie: newMovie});
+                return handler(newMovie);
             case types.book:
                 const book = new Book({...data, userId});
                 const newBook = await book.save();
-                return handler({book: newBook});
+                return handler(newBook);
             case types.todo:
                 const todo = new Todo({...data, userId});
                 const newTodo = await todo.save();
-                return handler({todo: newTodo});
+                return handler(newTodo);
             default:
                 return res.status(404).send({success: false, error: "Данный раздел не найден"});
         }
@@ -105,7 +106,7 @@ exports.create = async (req, res) => {
 
 exports.change = async (req, res) => {
     try {
-        const errors = changeValidation(req);
+        const errors = validationResult(req);
         if(!errors.isEmpty()) {
             return res.status(400).send({success: false, error: "Неверные данные", detail: errors.array()});
         }

@@ -5,7 +5,7 @@ const userSchema = new Schema({
     password: String,
     token: String,
     limit: {
-        type: String,
+        type: Number,
         default: 25,
     },
     movies: [{type: Types.ObjectId, ref: "movie"}],
