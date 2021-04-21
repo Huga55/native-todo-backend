@@ -100,7 +100,7 @@
 
 /**
  * @swagger
- * /section/:type/:id:
+ * /section/{type}/{id}:
  *  get:
  *      description: Get one elem by section type and id
  *      tags: [Section]
@@ -162,7 +162,7 @@
 
 /**
  * @swagger
- * /section/:type:
+ * /section/{type}:
  *  post:
  *      description: Create new elem
  *      tags: [Section]

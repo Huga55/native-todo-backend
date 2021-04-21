@@ -1,5 +1,0 @@
-{
-  "PORT": 3000,
-  "secret-string": "native-todo-wimdev",
-  "limit": 25
-}

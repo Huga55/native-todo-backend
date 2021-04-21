@@ -13,8 +13,8 @@ const types = {
 
 const changeKeyId = (arr) => {
     return arr.map(e => {
-        const { _id, ...other } = e;
-        return {id: _id, ...other};
+        const { _id, name, description } = e.toObject();
+        return {id: _id, name, description};
     });
 }
 
@@ -39,8 +39,8 @@ exports.getOne = async (req, res) => {
 
         const handler = (result) => {
             if(result) {
-                const { _id, ...other } = result;
-                return res.send({success: true, data: {...other, id: _id}});
+                const { _id, name, description } = result.toObject();
+                return res.send({success: true, data: {id: _id, name, description}});
             }
             return res.status(404).send({success: false, error: "Данный элемент не найден"});
         }
@@ -48,13 +48,13 @@ exports.getOne = async (req, res) => {
         switch(type) {
             case types.movie:
                 const movie = await Movie.findOne({userId, _id: id});
-                return handler({movie});
+                return handler(movie);
             case types.book:
                 const book = await Book.findOne({userId, _id: id});
-                return handler({book});
+                return handler(book);
             case types.todo:
                 const todo = await Todo.findOne({userId, _id: id});
-                return handler({todo})
+                return handler(todo)
             default:
                 return res.status(404).send({success: false, error: "Данный раздел не найден"});
         }
@@ -75,10 +75,9 @@ exports.create = async (req, res) => {
         const data = req.body;
 
         const handler = (result) => {
-            console.log("result", result);
             if(result) {
-                const {_id, name, description} = result;
-                return res.send({success: true, data: {name, description, id: _id}});
+                const {_id, name, description} = result.toObject();
+                return res.send({success: true, data: {id: _id, name, description}});
             }
             return res.status(404).send({success: false, error: "Данный элемент не найден"});
         }
@@ -117,8 +116,8 @@ exports.change = async (req, res) => {
 
         const handler = (result) => {
             if(result) {
-                const {_id, ...other} = result;
-                return res.send({success: true, data:{...other, id: _id}});
+                const {_id, name, description} = result;
+                return res.send({success: true, data:{id: _id, name, description}});
             }
             return res.status(404).send({success: false, error: "Данный элемент не найден"});
         }
