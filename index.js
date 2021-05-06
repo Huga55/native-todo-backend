@@ -36,9 +36,12 @@ const authRouter = require(path.join(__dirname, "routes", "auth", "authRouter"))
 const sectionRouter = require(path.join(__dirname, "routes", "section", "sectionRouter"));
 
 app.use("/auth", authRouter);
-app.use(authMiddleware);
 app.use("/section", sectionRouter);
 
+//404
+app.use(function(req, res) {
+    return res.status(404).send({success: false, error: "Данной страницы не существует"});
+})
 
 //server and mongodb
 const PORT = config.get("PORT") || 3000;
