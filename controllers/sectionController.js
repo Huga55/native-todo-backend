@@ -6,9 +6,9 @@ const { generalError } = require("./error");
 const { validationResult } = require('express-validator');
 
 const types = {
-    movie: "movie",
-    book: "book",
-    todo: "todo"
+    movie: "movies",
+    book: "books",
+    todo: "todos"
 }
 
 const changeKeyId = (arr) => {

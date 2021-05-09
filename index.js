@@ -39,6 +39,7 @@ app.use("/section", sectionRouter);
 
 //404
 app.use(function(req, res) {
+    console.log(req);
     return res.status(404).send({success: false, error: "Данной страницы не существует"});
 })
 
