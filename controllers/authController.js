@@ -6,6 +6,7 @@ const { generalError } = require("./error");
 const jwt = require("jsonwebtoken");
 const config  = require("config");
 const { validationResult } = require("express-validator");
+const nodemailer = require("nodemailer");
 
 exports.check = async (req, res) => {
     try {
@@ -98,4 +99,61 @@ exports.logout = async (req, res) => {
     } catch(e) {
         generalError(e, res);
     }
+}
+
+exports.remember = async (req, res) => {
+    try {
+        const errors = validationResult(req);
+        if(!errors.isEmpty()) {
+            return res.status(400).send({success: false, error: "Неверные данные", detail: errors.array()});
+        }
+
+        const { email } = req.body;
+
+        const user = await User.findOne({email});
+
+        if(!user) {
+            return res.status(409).send({success: false, error: "Пользователь с данным email не найден"});
+        }
+
+        const password = randomstring.generate(6);
+
+        const hashPassword = await bcrypt.hash(password, 12);
+
+        await User.updateOne({email}, {password: hashPassword});
+
+        await main(email, password);
+
+        return res.status(200).send({success: true, data: {message: "На Ваш email был выслан сгенерированный пароль"}});
+    }catch(e) {
+        generalError(e, res);
+    }
+}
+
+const main = async (email, password) => {
+    const transporter = nodemailer.createTransport({
+        service: 'gmail',
+        port: 465,
+        secure: true,
+        auth: {
+            user: config.get("email"),
+            pass: config.get("password")
+        },
+    });
+
+    const mailOptions = {
+        from: config.get("email"),
+        to: email,
+        subject: 'ВОССТАНОВЛЕНИЕ ПАРОЛЯ',
+        text: `Ваше новый пароль: ${password}. С данного момента старый пароль больше не действителен. По возникшим вопросам можете воспользоваться формой обратной связи
+                на сайте https://wimdev.com`
+    };
+
+    await transporter.sendMail(mailOptions, function(error, info){
+        if (error) {
+            console.log(error);
+        } else {
+            console.log('Email sent: ' + info.response);
+        }
+    });
 }
